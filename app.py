@@ -1,85 +1,69 @@
 from pywebio import *
+from pywebio.output import *
+from pywebio.input import *
 import config
 from web3 import Web3
+import requests
+import json
 
 
-def ether_price(web3):
-    # TODO get real data
-    return 3007.84
+@use_scope('dashboard', clear=True)
+def put_addresses(web3):
+    address = input(
+        type=TEXT,
+        required=True,
+        label='Ethereum Address',
+        placeholder='Enter address to lookup'
+    )
+    balance = web3.eth.get_balance(address)
+    balance_usd = balance * web3.fromWei(balance, "ether")
+    transaction_count = web3.eth.get_transaction_count(address)
+    put_table(
+        tdata=[
+            ["Balance", balance],
+            ["Transaction Count", transaction_count]
+        ],
+        header=[
+            f'Info on {address}', None
+        ]
+    )
 
 
-def market_cap(web3):
-    # TODO get real data
-    return 357447543603.00
+@use_scope('dashboard', clear=True)
+def put_blocks(web3):
+    put_text("## Blocks")
 
 
-def transactions(web3):
-    # TODO get real data
-    transaction_data = 1543.43
-    return f"{transaction_data} M"
+@use_scope('dashboard', clear=True)
+def put_transactions(web3):
+    put_text("## Transactions")
 
 
-def gas_price(web3):
-    # TODO get real data
-    gas_data = 53
-    dollar_price = 3.35
-    return f"{gas_data} Gwei ({dollar_price})"
-
-
-def difficulty(web3):
-    # TODO get real data
-    difficulty_data = 13610.06
-    return f"{difficulty_data} TH"
-
-
-def hash_rate(web3):
-    # TODO get real data
-    hash_rate_data = 1053608.37
-    return f"{hash_rate_data} GH/s"
-
-
-def output_ether(web3):
-    ether_data = [
-        ["ETHER PRICE", ether_price(web3)],
-        ["MARKET CAP", market_cap(web3)],
-        ["TRANSACTIONS", transactions(web3)],
-        ["MED GAS PRICE", gas_price(web3)],
-        ["DIFFICULTY", difficulty(web3)],
-        ["HASH RATE", hash_rate(web3)]
-    ]
-    ether_output = []
-    for i in range(len(ether_data)):
-        ether_output.append(output.put_column([
-            output.put_text(ether_data[i][0]),
-            output.put_text(ether_data[i][1])
-        ]))
-    return [
-        output.put_column([ether_output[0], ether_output[1]]),
-        output.put_column([ether_output[2], ether_output[3]]),
-        output.put_column([ether_output[4], ether_output[5]])
-    ]
-
-
-def latest_blocks(web3):
-    block = web3.eth.get_block('latest')
-    blocks = [output.put_text("BLOCKS"), None]
-    row_style = 'border-bottom: solid black 1px; margin-top:0.25rem'
-    for i in range(10):
-        this_block = web3.eth.get_block(block.number - i)
-        blocks.append(output.put_row([
-            output.put_text(this_block.number),
-            output.put_text(this_block.miner),
-            None,
-            output.put_text(this_block.difficulty)
-        ]).style(row_style))
-    return blocks
+def query_etherscan(module, action, address):
+    url = f'https://api.etherscan.io/api?module={module}&action={action}&address={address}&tag=latest&apikey={config.ETHERSCAN_API_KEY}'
+    response = requests.get(url).text
+    return json.loads(response)["result"]
 
 
 def main():
+    # ? need this stuff?
     web3 = Web3(Web3.HTTPProvider(config.INFURA_URL))
     box_style = 'border: solid black 1px; border-radius: 10px; padding: 1rem; margin: 1rem'
-    output.put_row(output_ether(web3)).style(box_style)
-    output.put_column(latest_blocks(web3)).style(box_style)
+    # Setup layout
+    session.set_env(title='PyWebIO Ethereum Demo', output_max_width='100%')
+    put_row([put_scope('left-navbar'), None,
+            put_scope('dashboard')], size='200px 50px 85%')
+    with use_scope('left-navbar'):
+        put_grid([[
+            put_text('PyWebIO Ether Demo'),
+            put_markdown('#### Accounts').onclick(lambda: put_addresses(web3)),
+            put_markdown('#### Blocks').onclick(lambda: put_blocks(web3)),
+            put_markdown('#### Transactions').onclick(
+                lambda: put_transactions(web3)),
+
+        ]], direction='column')
+
+    put_addresses(web3)
 
 
 start_server(main, port=8080)
