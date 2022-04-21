@@ -7,26 +7,33 @@ import requests
 import json
 
 
+# def uid_generator(size, chars=string.ascii_uppercase):
+#     return ''.join(random.choice(chars) for _ in range(size))
+
+
 @use_scope('dashboard', clear=True)
 def put_addresses(web3):
-    address = input(
-        type=TEXT,
-        required=True,
+    pin.put_input(
+        name='address',
         label='Ethereum Address',
         placeholder='Enter address to lookup'
     )
-    balance = web3.eth.get_balance(address)
-    balance_usd = balance * web3.fromWei(balance, "ether")
-    transaction_count = web3.eth.get_transaction_count(address)
-    put_table(
-        tdata=[
-            ["Balance", balance],
-            ["Transaction Count", transaction_count]
-        ],
-        header=[
-            f'Info on {address}', None
-        ]
-    )
+    while True:
+        address = pin.pin_wait_change('address')['value']
+        if web3.isAddress(address):
+            balance = web3.eth.get_balance(address)
+            balance_usd = balance * web3.fromWei(balance, "ether")
+            transaction_count = web3.eth.get_transaction_count(address)
+            put_table(
+                tdata=[
+                    ["Balance", balance],
+                    ["Value", f"${balance_usd}"],
+                    ["Transaction Count", transaction_count]
+                ],
+                header=[
+                    f'Info on {address}', None
+                ]
+            )
 
 
 @use_scope('dashboard', clear=True)
