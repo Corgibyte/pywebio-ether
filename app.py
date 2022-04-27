@@ -231,11 +231,11 @@ def put_navbar(web3):
         [
             [
                 put_markdown("### PyWebIO Ether Demo"),
-                put_markdown("#### Accounts").onclick(lambda: put_accounts(web3)),
                 put_markdown("#### Blocks").onclick(lambda: put_blocks(web3)),
                 put_markdown("#### Transactions").onclick(
                     lambda: put_transactions(web3)
                 ),
+                put_markdown("#### Account Lookup").onclick(lambda: put_accounts(web3)),
             ]
         ],
         direction="column",
@@ -253,7 +253,7 @@ def main():
             size="1fr 50px 4fr",
         )
         put_navbar(web3)
-        put_accounts(web3)
+        put_blocks(web3)
     else:
         put_markdown("## Error: No Infura URL Setup")
 
