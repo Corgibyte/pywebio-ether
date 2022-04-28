@@ -29,7 +29,8 @@ def get_block_miners(web3):
         y=data.values(),
         labels={"x": "Miner Rank", "y": "Number of Blocks Mined"},
         title=f"Top Mining Accounts from Sample of 1,000 Blocks",
-        markers=True,
+        #! Doesn't work with older plotly on pywebio build website
+        # markers=True,
     )
     return fig.to_html(include_plotlyjs="require", full_html=False)
 
