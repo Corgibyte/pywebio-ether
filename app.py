@@ -1,6 +1,7 @@
 from pywebio import *
 from pywebio.output import *
 from pywebio.input import *
+import charts
 from web3 import Web3
 from web3.exceptions import BlockNotFound, TransactionNotFound
 import os
@@ -231,6 +232,7 @@ def put_navbar(web3):
         [
             [
                 put_markdown("### PyWebIO Ether Demo"),
+                put_markdown("#### Charts").onclick(lambda: put_accounts(web3)),
                 put_markdown("#### Blocks").onclick(lambda: put_blocks(web3)),
                 put_markdown("#### Transactions").onclick(
                     lambda: put_transactions(web3)
@@ -240,6 +242,12 @@ def put_navbar(web3):
         ],
         direction="column",
     )
+
+
+@use_scope("dashboard")
+def put_charts(web3):
+    put_markdown("## Charts")
+    put_html(charts.get_block_miners(web3)).style("width: 60vw; height: 40rem")
 
 
 def main():
@@ -253,7 +261,8 @@ def main():
             size="1fr 50px 4fr",
         )
         put_navbar(web3)
-        put_blocks(web3)
+        put_charts(web3)
+
     else:
         put_markdown("## Error: No Infura URL Setup")
 
