@@ -221,7 +221,7 @@ def put_navbar(web3):
     )
 
 
-@use_scope("dashboard")
+@use_scope("dashboard", clear=True)
 def put_charts(web3):
     put_markdown("## Charts")
     put_html(charts.get_block_miners(web3)).style("width: 60vw; height: 40rem")
