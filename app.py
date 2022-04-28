@@ -265,6 +265,3 @@ def main():
 
     else:
         put_markdown("## Error: No Infura URL Setup")
-
-
-start_server(main, port=8080)
