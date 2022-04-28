@@ -7,43 +7,21 @@ from web3.exceptions import BlockNotFound, TransactionNotFound
 import os
 
 
-@use_scope("dashboard", clear=True)
-def put_accounts(web3):
-    put_scope("search")
-    put_scope("results")
-    with use_scope("search"):
-        put_row(
-            [
-                pin.put_input(
-                    type=TEXT,
-                    name="address_search",
-                    placeholder="Enter account address to lookup",
-                ),
-                None,
-                put_button(
-                    "Search",
-                    onclick=lambda: put_account_search(web3, pin.pin["address_search"]),
-                    outline=True,
-                ),
-            ],
-            size="40% 10px 15%",
-        )
-
-
-@use_scope("results", clear=True)
 def put_account_search(web3, account_search):
-    if web3.isAddress(account_search):
-        balance = web3.eth.get_balance(account_search)
-        transaction_count = web3.eth.get_transaction_count(account_search)
-        put_table(
-            tdata=[
-                ["Balance", f"{web3.fromWei(balance, 'ether'):,.0f} ether"],
-                ["Transaction Count", transaction_count],
-            ],
-            header=[f"Info on {account_search}", None],
-        )
-    else:
-        put_markdown(f"**Account not found**").style("color: red")
+    popup("Account Info", [put_scope("popup_content")], PopupSize.LARGE)
+    with use_scope("popup_content"):
+        if web3.isAddress(account_search):
+            balance = web3.eth.get_balance(account_search)
+            transaction_count = web3.eth.get_transaction_count(account_search)
+            put_table(
+                tdata=[
+                    ["Balance", f"{web3.fromWei(balance, 'ether'):,.0f} ether"],
+                    ["Transaction Count", transaction_count],
+                ],
+                header=[f"Info on {account_search}", None],
+            )
+        else:
+            put_markdown(f"**Account not found**").style("color: red")
 
 
 @use_scope("dashboard", clear=True)
@@ -73,7 +51,7 @@ def put_blocks(web3):
     put_latest_blocks(web3)
 
 
-@use_scope("latest")
+@use_scope("results", clear=True)
 def put_block_search(web3, block_number):
     if block_number != None:
         try:
@@ -232,12 +210,11 @@ def put_navbar(web3):
         [
             [
                 put_markdown("### PyWebIO Ether Demo"),
-                put_markdown("#### Charts").onclick(lambda: put_accounts(web3)),
+                put_markdown("#### Charts").onclick(lambda: put_charts(web3)),
                 put_markdown("#### Blocks").onclick(lambda: put_blocks(web3)),
                 put_markdown("#### Transactions").onclick(
                     lambda: put_transactions(web3)
                 ),
-                put_markdown("#### Account Lookup").onclick(lambda: put_accounts(web3)),
             ]
         ],
         direction="column",
@@ -265,3 +242,7 @@ def main():
 
     else:
         put_markdown("## Error: No Infura URL Setup")
+
+
+if __name__ == "__main__":
+    start_server(port=8080, applications=main)
