@@ -225,6 +225,10 @@ def put_navbar(web3):
 def put_charts(web3):
     put_markdown("## Charts")
     put_html(charts.get_block_miners(web3)).style("width: 60vw; height: 40rem")
+    put_markdown(
+        "###### This graph shows the miners who mined the most blocks from a sample of 1,000 blocks."
+    )
+    put_markdown("---")
 
 
 def main():
