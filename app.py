@@ -231,8 +231,10 @@ def put_charts(web3):
     put_markdown("---")
 
 
+@config(theme="dark")
 def main():
     session.set_env(title="PyWebIO Ethereum Demo", output_max_width="100%")
+    # config(title="PyWebIO Ethereum Demo", theme="dark")
     if "INFURA_URL" in os.environ:
         url = os.environ["INFURA_URL"]
         web3 = Web3(Web3.HTTPProvider(url))
